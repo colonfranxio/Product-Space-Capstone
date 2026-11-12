@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { DEFAULT_PALETTE } from "@/lib/contract";
 import { getOrganization } from "@/lib/data";
-import { NewEventForm } from "./new-event-form";
+import { EventForm } from "../event-form";
 
 export default function NewEventPage() {
   return (
@@ -17,5 +17,5 @@ async function Load() {
   const org = await getOrganization();
   if (!org) redirect("/dashboard");
   const host = (await headers()).get("host") ?? "";
-  return <NewEventForm orgId={org.id} host={host} colors={org.brandColors ?? DEFAULT_PALETTE} />;
+  return <EventForm org={org} host={host} colors={org.brandColors ?? DEFAULT_PALETTE} />;
 }

@@ -1,6 +1,6 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Inter, Lora, Montserrat, Playfair_Display, Space_Grotesk } from "next/font/google";
-import { TEMPLATES, type ImageSlotId, type ResolvedReport } from "@/lib/contract";
+import { TEMPLATES, type ImageSlotId, type ResolvedReport, type TextBlockId } from "@/lib/contract";
 import { textOn } from "@/lib/color";
 import { RichText } from "./rich-text";
 import "./report.css";
@@ -17,12 +17,16 @@ const fontVars = [inter, playfair, lora, montserrat, grotesk].map((f) => f.varia
 const aspect = Object.fromEntries(TEMPLATES["impact-classic"].imageSlots.map((x) => [x.id, x.aspect])) as Record<ImageSlotId, number>;
 
 /** An uploaded image framed by its react-easy-crop `area` (percentages) inside a box of the slot's aspect. */
-function Photo({ report, slot }: { report: ResolvedReport; slot: ImageSlotId }) {
+function Photo({ report, slot, onPick }: { report: ResolvedReport; slot: ImageSlotId; onPick?: (slot: ImageSlotId) => void }) {
   const img = report.images[slot];
   if (!img) return null;
   const { x, y, width, height } = img.area;
+  const pick = onPick && {
+    role: "button", tabIndex: 0, "aria-label": `Edit ${slot.replace("_", " ")} photo`, className: "ssr-frame ssr-pick",
+    onClick: () => onPick(slot), onKeyDown: (e: React.KeyboardEvent) => e.key === "Enter" && onPick(slot),
+  };
   return (
-    <div className="ssr-frame" style={{ aspectRatio: aspect[slot] }}>
+    <div className="ssr-frame" style={{ aspectRatio: aspect[slot] }} {...pick}>
       <img
         src={img.url}
         alt={img.alt}
@@ -35,8 +39,14 @@ function Photo({ report, slot }: { report: ResolvedReport; slot: ImageSlotId }) 
 
 const PROOF_SLOTS = ["proof_primary", "proof_secondary", "event_moment"] as const;
 
+/** Editor hooks: `text` swaps every text block for an inline editor (empty blocks stay visible); `onPhoto` makes photos clickable. */
+export interface ReportEdit {
+  text?: (id: TextBlockId) => ReactNode;
+  onPhoto?: (slot: ImageSlotId) => void;
+}
+
 /** The one report renderer: public page, admin Viewer and editor preview. Empty sections are omitted. */
-export function ReportRenderer({ report }: { report: ResolvedReport }) {
+export function ReportRenderer({ report, edit }: { report: ResolvedReport; edit?: ReportEdit }) {
   const { event, sponsor, palette, text, metrics, cta } = report;
   const vars = {
     "--r-bg": palette.background,
@@ -47,6 +57,8 @@ export function ReportRenderer({ report }: { report: ResolvedReport }) {
     "--r-on-accent": textOn(palette.accent),
   } as CSSProperties;
   const proof = PROOF_SLOTS.filter((id) => report.images[id]);
+  const t = (id: TextBlockId) => (edit?.text ? edit.text(id) : text[id] && <RichText doc={text[id]} />);
+  const photo = (slot: ImageSlotId) => <Photo report={report} slot={slot} onPick={edit?.onPhoto} />;
 
   return (
     <article className={`ssr-root ${fontVars}`} style={vars}>
@@ -62,18 +74,18 @@ export function ReportRenderer({ report }: { report: ResolvedReport }) {
           </div>
         </div>
         <h1 className="ssr-headline ssr-rt">
-          {text.headline ? <RichText doc={text.headline} flat /> : sponsor.name ? `Thank you, ${sponsor.name}.` : "Thank you."}
+          {edit?.text ? edit.text("headline") : text.headline ? <RichText doc={text.headline} flat /> : sponsor.name ? `Thank you, ${sponsor.name}.` : "Thank you."}
         </h1>
       </header>
 
-      <Photo report={report} slot="hero" />
+      {photo("hero")}
 
-      {(text.thank_you || text.narrative) && (
+      {(t("thank_you") || t("narrative")) && (
         <section className="ssr-thanks">
           <div className="ssr-eyebrow">A note from the team</div>
           <div className="ssr-thanksBody">
-            {text.thank_you && <div className="ssr-rt"><RichText doc={text.thank_you} /></div>}
-            {text.narrative && <div className="ssr-rt ssr-narrative"><RichText doc={text.narrative} /></div>}
+            {t("thank_you") && <div className="ssr-rt">{t("thank_you")}</div>}
+            {t("narrative") && <div className="ssr-rt ssr-narrative">{t("narrative")}</div>}
             <p className="ssr-signoff">— The {event.title} team</p>
           </div>
         </section>
@@ -95,14 +107,14 @@ export function ReportRenderer({ report }: { report: ResolvedReport }) {
         </section>
       )}
 
-      {(proof.length > 0 || text.proof_description) && (
+      {(proof.length > 0 || t("proof_description")) && (
         <section className="ssr-section">
           <h2 className="ssr-h2">Where you showed up</h2>
-          {text.proof_description && <div className="ssr-rt ssr-proofIntro"><RichText doc={text.proof_description} /></div>}
+          {t("proof_description") && <div className="ssr-rt ssr-proofIntro">{t("proof_description")}</div>}
           <div className="ssr-proofGrid">
             {proof.map((id) => (
               <figure key={id}>
-                <Photo report={report} slot={id} />
+                {photo(id)}
                 {report.images[id]?.caption && <figcaption>{report.images[id].caption}</figcaption>}
               </figure>
             ))}
@@ -110,9 +122,9 @@ export function ReportRenderer({ report }: { report: ResolvedReport }) {
         </section>
       )}
 
-      {text.closing && (
+      {t("closing") && (
         <section className="ssr-section">
-          <div className="ssr-rt ssr-closing"><RichText doc={text.closing} /></div>
+          <div className="ssr-rt ssr-closing">{t("closing")}</div>
         </section>
       )}
 

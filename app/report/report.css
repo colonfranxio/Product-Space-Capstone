@@ -11,8 +11,14 @@
 .ssr-sans { font-family: var(--font-instrument), system-ui, sans-serif; }
 .ssr-eyebrow { font: 500 13px var(--font-instrument), system-ui, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; }
 
-.ssr-rt > * { margin: 0; font: inherit; }
-.ssr-rt > * + * { margin-top: 0.6em; }
+.ssr-rt > *, .ssr-rt .ProseMirror > * { margin: 0; font: inherit; }
+.ssr-rt > * + *, .ssr-rt .ProseMirror > * + * { margin-top: 0.6em; }
+/* Editor only: inline Tiptap blocks and clickable photos. */
+.ssr-rt .ProseMirror { outline: 1px dashed transparent; outline-offset: 4px; border-radius: 2px; cursor: text; }
+.ssr-rt .ProseMirror:hover { outline-color: color-mix(in srgb, currentColor 35%, transparent); }
+.ssr-rt .ProseMirror:focus { outline: 2px solid var(--r-accent); }
+.ssr-pick { cursor: pointer; }
+.ssr-pick:hover, .ssr-pick:focus-visible { outline: 3px solid var(--r-accent); outline-offset: -3px; }
 .ssr-rt h1 { font-size: 1.6em; }
 .ssr-rt h2 { font-size: 1.35em; }
 .ssr-rt h3 { font-size: 1.15em; }

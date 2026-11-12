@@ -40,6 +40,25 @@ export async function createOrganization(input: { name: string; logoPath?: strin
   return { ok: true, data: toOrg(data) };
 }
 
+export async function updateOrganization(input: Partial<{ name: string; logoPath: string | null; brandColors: Palette | null }>): R<"updateOrganization"> {
+  const db = await authed();
+  if (!db) return fail("unauthorized");
+  const e: Record<string, string> = {};
+  if (input.name !== undefined && !input.name?.trim()) e.name = "Required";
+  if (input.logoPath != null && typeof input.logoPath !== "string") e.logoPath = "Invalid logo";
+  if (input.brandColors) validatePalette(input.brandColors, "brandColors", e);
+  if (!isEmpty(e)) return invalid(e);
+  const row: Record<string, unknown> = {};
+  if (input.name !== undefined) row.name = input.name.trim();
+  if (input.logoPath !== undefined) row.logo_path = input.logoPath;
+  if (input.brandColors !== undefined) row.brand_colors = input.brandColors;
+  const { data: org } = await db.from("organizations").select("id").maybeSingle(); // RLS: only the caller's org
+  if (!org) return fail("not found");
+  const { data, error } = await db.from("organizations").update(row).eq("id", org.id).select().maybeSingle();
+  if (error) return fail(error.message);
+  return data ? { ok: true, data: toOrg(data) } : fail("not found");
+}
+
 function validateEventInput(i: Partial<EventInput>, creating: boolean) {
   const e: Record<string, string> = {};
   if ((creating || i.title !== undefined) && !i.title?.trim()) e.title = "Required";

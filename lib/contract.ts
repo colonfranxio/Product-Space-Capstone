@@ -252,6 +252,8 @@ export interface SponsorDraftInput {
 export interface Actions {
   /** First sign-in: creates the admin's organization. */
   createOrganization(input: { name: string; logoPath?: string | null; brandColors?: Palette | null }): Promise<Result<OrganizationRecord>>;
+  /** Partial update of the admin's own organization (e.g. attach a logo uploaded after setup). */
+  updateOrganization(input: Partial<{ name: string; logoPath: string | null; brandColors: Palette | null }>): Promise<Result<OrganizationRecord>>;
   createEvent(input: EventInput): Promise<Result<EventRecord>>;
   updateEvent(eventId: string, input: Partial<EventInput>): Promise<Result<EventRecord>>;
   /** Creates an empty draft sponsor; the frontend then navigates to its editor. */

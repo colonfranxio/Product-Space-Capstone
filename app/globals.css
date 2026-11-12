@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Admin UI tokens (design_handoff_sponsorstory/README.md). The admin is dark-only; reports bring their own palette. */
+@theme {
+  --color-page: #151618;
+  --color-bar: #0e0f10;
+  --color-panel: #1d1f22;
+  --color-raised: #26282c;
+  --color-rail: #1a1c1f;
+  --color-line: #33363b;
+  --color-line-input: #3a3d42;
+  --color-line-dash: #4a4d53;
+  --color-ink: #edece8;
+  --color-muted: #a09f99;
+  --color-accent: oklch(0.8 0.13 80);
+  --color-accent-hover: oklch(0.88 0.1 80);
+  --color-on-accent: #1a1a1a;
+  --color-ok: oklch(0.8 0.13 155);
+  --color-err: oklch(0.75 0.13 30);
+  --font-sans: var(--font-instrument), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-serif: var(--font-newsreader), Georgia, serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+@layer components {
+  .page { padding: 28px clamp(16px, 4vw, 48px) 60px; }
+  .h1 { font-weight: 600; font-size: 26px; letter-spacing: -0.01em; margin: 0; }
+  .eyebrow { font: 500 12px var(--font-mono); color: var(--color-accent); text-transform: uppercase; }
+  .label { font-size: 12px; font-weight: 500; color: var(--color-muted); margin-bottom: 6px; display: block; }
+  .input {
+    width: 100%; box-sizing: border-box; min-height: 44px; background: var(--color-panel);
+    border: 1px solid var(--color-line-input); border-radius: 6px; color: var(--color-ink); padding: 10px 12px; font-size: 15px;
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 6px;
+    padding: 10px 18px; font-weight: 600; font-size: 14px; cursor: pointer; text-decoration: none;
+    background: var(--color-accent); color: var(--color-on-accent); border: 0;
+  }
+  .btn:hover { background: var(--color-accent-hover); }
+  .btn:disabled { opacity: 0.45; cursor: default; background: var(--color-accent); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 6px;
+    padding: 10px 16px; font-weight: 500; font-size: 14px; cursor: pointer; text-decoration: none;
+    background: transparent; color: var(--color-ink); border: 1px solid var(--color-line-input);
+  }
+  .card { background: var(--color-panel); border: 1px solid var(--color-line); border-radius: 10px; color: var(--color-ink); }
+  .striped {
+    background: repeating-linear-gradient(135deg, #26282c 0 10px, #2b2d32 10px 20px);
+    display: flex; align-items: center; justify-content: center; font: 400 11px var(--font-mono); color: var(--color-muted);
+  }
+  .err { color: var(--color-err); font-size: 13px; margin: 6px 0 0; }
 }

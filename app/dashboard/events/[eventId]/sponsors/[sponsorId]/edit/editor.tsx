@@ -13,7 +13,7 @@ import { contrast, textOn } from "@/lib/color";
 import { mediaUrl, resolveReport } from "@/lib/report";
 import { uploadMedia } from "@/lib/upload";
 import { isHttpsUrl } from "@/lib/validate";
-import { DangerZone } from "@/app/dashboard/danger-zone";
+import { DeleteButton } from "@/app/dashboard/danger-zone";
 import { ImagePick } from "@/app/dashboard/image-pick";
 import { Swatches } from "@/app/dashboard/swatches";
 import { logoColors } from "./logo-colors";
@@ -165,7 +165,6 @@ export function Editor({ event, sponsor, host }: { event: EventRecord; sponsor: 
           setLogoError("error" in res ? res.error : "");
           if ("path" in res) update((d) => ({ ...d, logoPath: res.path }));
         }} />
-      <div className="mt-6"><DangerZone kind="sponsor" id={sponsor.id} after={`/dashboard/events/${event.id}`} /></div>
     </>,
     // 2 Template
     <>
@@ -314,7 +313,7 @@ export function Editor({ event, sponsor, host }: { event: EventRecord; sponsor: 
         <button type="button" className="btn-ghost text-[13px]! border-0!" onClick={async () => { await flush(); router.push(`/dashboard/events/${event.id}`); }}>← Sponsors</button>
         <span className="font-semibold text-sm truncate">{draft.name || "New sponsor"}</span>
         <span className="font-mono text-[11px] text-muted">{locked ? "LIVE VERSION STAYS UP" : "DRAFT"}</span>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
           <span className={`text-xs ${status === "Couldn't save" ? "text-err" : "text-muted"}`} role="status">{status}</span>
           <button type="button" className="btn-ghost text-[13px]!" onClick={() => save(draft)}>Save draft</button>
           {/* The Viewer reads the saved draft, so save first. */}
@@ -322,6 +321,7 @@ export function Editor({ event, sponsor, host }: { event: EventRecord; sponsor: 
             onClick={async () => { await flush(); router.push(`/dashboard/events/${event.id}/sponsors/${sponsor.id}?preview=draft`); }}>
             Preview
           </button>
+          <DeleteButton kind="sponsor" id={sponsor.id} after={`/dashboard/events/${event.id}`} />
         </div>
         <div className="w-full grid grid-cols-2 gap-1 min-[760px]:hidden" role="tablist">
           {(["edit", "preview"] as const).map((v) => (

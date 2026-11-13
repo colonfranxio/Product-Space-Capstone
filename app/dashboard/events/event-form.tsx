@@ -61,7 +61,7 @@ export function EventForm({ org, host, colors: initialColors, event }: {
       const f = res.fieldErrors ?? {};
       return setErrors({ ...f, ctaUrl: f["defaultCta.url"] && HTTPS_MSG, form: res.fieldErrors ? "" : res.error });
     }
-    router.push("/dashboard");
+    router.push(`/dashboard/events/${res.data.id}`);
     router.refresh();
   }
 

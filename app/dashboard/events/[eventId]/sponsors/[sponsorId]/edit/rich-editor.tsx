@@ -80,7 +80,7 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
       align: TEXT_ALIGNS.find((a) => e.isActive({ textAlign: a })) ?? "left",
     },
   });
-  if (!editor || !s) return <p className="text-[13px] text-muted m-0">Click any text in the preview to start editing it.</p>;
+  if (!editor || !s) return <p className="text-[13px] text-muted m-0">Formatting tools appear here once you are editing a block.</p>;
   const run = () => editor.chain().focus();
   const keep = (e: React.MouseEvent) => e.preventDefault(); // keep the selection in the editor
 

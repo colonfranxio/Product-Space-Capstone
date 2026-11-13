@@ -232,11 +232,15 @@ export function Editor({ event, sponsor, host }: { event: EventRecord; sponsor: 
         <div className="eyebrow">Numbers worth showing</div>
         <p className="text-[13px] text-muted m-0">Only add figures you can stand behind. Leave this empty and the section is hidden.</p>
         {c.metrics.map((m) => (
-          <div key={m.id} className="flex gap-1.5">
-            <input className="input w-24! flex-none" value={m.value} placeholder="640" aria-label="Value" onChange={(e) => setMetric(m.id, { value: e.target.value })} />
-            <input className="input flex-1 min-w-0" value={m.label} placeholder="What the number counts" aria-label="Label" onChange={(e) => setMetric(m.id, { label: e.target.value })} />
-            <button type="button" className="btn-ghost w-11 flex-none px-0!" aria-label="Remove metric"
-              onClick={() => content((c) => ({ metrics: c.metrics.filter((x) => x.id !== m.id) }))}>×</button>
+          <div key={m.id} className="flex flex-col gap-1.5">
+            <div className="flex gap-1.5">
+              <input className="input w-24! flex-none" value={m.value} placeholder="640" aria-label="Value" onChange={(e) => setMetric(m.id, { value: e.target.value })} />
+              <input className="input flex-1 min-w-0" value={m.label} placeholder="What the number counts" aria-label="Label" onChange={(e) => setMetric(m.id, { label: e.target.value })} />
+              <button type="button" className="btn-ghost w-11 flex-none px-0!" aria-label="Remove metric"
+                onClick={() => content((c) => ({ metrics: c.metrics.filter((x) => x.id !== m.id) }))}>×</button>
+            </div>
+            <input className="input text-[13px]!" value={m.context ?? ""} placeholder="Context · optional, e.g. across both days" aria-label="Context"
+              onChange={(e) => setMetric(m.id, { context: e.target.value || undefined })} />
           </div>
         ))}
         <button type="button" className="btn-ghost self-start text-[13px]!"
@@ -310,9 +314,11 @@ export function Editor({ event, sponsor, host }: { event: EventRecord; sponsor: 
         <span className="font-mono text-[11px] text-muted">{locked ? "LIVE VERSION STAYS UP" : "DRAFT"}</span>
         <div className="ml-auto flex items-center gap-2">
           <span className={`text-xs ${status === "Couldn't save" ? "text-err" : "text-muted"}`} role="status">{status}</span>
-          <button type="button" className="btn-ghost text-[13px]! hidden min-[760px]:inline-flex" onClick={() => save(draft)}>Save draft</button>
-          <button type="button" className="btn-ghost text-[13px]! hidden min-[760px]:inline-flex" onClick={() => setView(view === "edit" ? "preview" : "edit")}>
-            {view === "edit" ? "Preview" : "Back to editing"}
+          <button type="button" className="btn-ghost text-[13px]!" onClick={() => save(draft)}>Save draft</button>
+          {/* The Viewer reads the saved draft, so save first. */}
+          <button type="button" className="btn-ghost text-[13px]! hidden min-[760px]:inline-flex"
+            onClick={async () => { await flush(); router.push(`/dashboard/events/${event.id}/sponsors/${sponsor.id}?preview=draft`); }}>
+            Preview
           </button>
         </div>
         <div className="w-full grid grid-cols-2 gap-1 min-[760px]:hidden" role="tablist">
@@ -325,7 +331,9 @@ export function Editor({ event, sponsor, host }: { event: EventRecord; sponsor: 
 
       <div className="flex-1 min-h-0 flex">
         <div className={`flex-1 min-w-0 overflow-y-auto p-3 min-[760px]:p-5 ${view === "edit" ? "hidden min-[760px]:block" : ""}`}>
-          <div className="max-w-[1100px] mx-auto rounded-lg overflow-hidden">
+          {/* Outside step 5, clicking any text block jumps to the text step. */}
+          <div className="max-w-[1100px] mx-auto rounded-lg overflow-hidden"
+            onClick={(e) => { if (step !== 5 && (e.target as HTMLElement).closest(".ssr-rt")) { go(5); setView("edit"); } }}>
             <ReportRenderer report={report} edit={{
               text: step === 5 ? (id) => (
                 <BlockEditor key={id} doc={c.text[id] ?? defaultCopy(id, draft.name, event.title)} onFocus={setActive}

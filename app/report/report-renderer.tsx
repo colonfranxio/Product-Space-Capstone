@@ -16,24 +16,37 @@ const fontVars = [inter, playfair, lora, montserrat, grotesk].map((f) => f.varia
 
 const aspect = Object.fromEntries(TEMPLATES["impact-classic"].imageSlots.map((x) => [x.id, x.aspect])) as Record<ImageSlotId, number>;
 
-/** An uploaded image framed by its react-easy-crop `area` (percentages) inside a box of the slot's aspect. */
+/**
+ * An uploaded image framed by its react-easy-crop `area` (percentages) inside a box of the slot's aspect.
+ * The description is shown under the photo for everyone; the img gets alt="" so screen readers read it once, from the caption.
+ */
 function Photo({ report, slot, onPick }: { report: ResolvedReport; slot: ImageSlotId; onPick?: (slot: ImageSlotId) => void }) {
   const img = report.images[slot];
   if (!img) return null;
   const { x, y, width, height } = img.area;
+  const alt = img.alt.trim();
+  const caption = img.caption?.trim();
   const pick = onPick && {
     role: "button", tabIndex: 0, "aria-label": `Edit ${slot.replace("_", " ")} photo`, className: "ssr-frame ssr-pick",
     onClick: () => onPick(slot), onKeyDown: (e: React.KeyboardEvent) => e.key === "Enter" && onPick(slot),
   };
   return (
-    <div className="ssr-frame" style={{ aspectRatio: aspect[slot] }} {...pick}>
-      <img
-        src={img.url}
-        alt={img.alt}
-        loading={slot === "hero" ? undefined : "lazy"}
-        style={{ width: `${10000 / width}%`, height: `${10000 / height}%`, left: `${(-x * 100) / width}%`, top: `${(-y * 100) / height}%` }}
-      />
-    </div>
+    <figure className={`ssr-figure ssr-figure-${slot}`}>
+      <div className="ssr-frame" style={{ aspectRatio: aspect[slot] }} {...pick}>
+        <img
+          src={img.url}
+          alt=""
+          loading={slot === "hero" ? undefined : "lazy"}
+          style={{ width: `${10000 / width}%`, height: `${10000 / height}%`, left: `${(-x * 100) / width}%`, top: `${(-y * 100) / height}%` }}
+        />
+      </div>
+      {(alt || caption) && (
+        <figcaption>
+          {alt && <span>{alt}</span>}
+          {caption && caption !== alt && <span className="ssr-caption">{caption}</span>}
+        </figcaption>
+      )}
+    </figure>
   );
 }
 
@@ -112,12 +125,7 @@ export function ReportRenderer({ report, edit }: { report: ResolvedReport; edit?
           <h2 className="ssr-h2">Where you showed up</h2>
           {t("proof_description") && <div className="ssr-rt ssr-proofIntro">{t("proof_description")}</div>}
           <div className="ssr-proofGrid">
-            {proof.map((id) => (
-              <figure key={id}>
-                {photo(id)}
-                {report.images[id]?.caption && <figcaption>{report.images[id].caption}</figcaption>}
-              </figure>
-            ))}
+            {proof.map((id) => <div key={id}>{photo(id)}</div>)}
           </div>
         </section>
       )}

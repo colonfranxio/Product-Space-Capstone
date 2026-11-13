@@ -64,7 +64,7 @@ export function PhotoStep({ images, folder, slot, setSlot, onChange, onDone }: {
               onChange={(e) => patch({ zoom: Number(e.target.value) })} />
           </label>
           <div>
-            <label className="label" htmlFor="alt">Describe the photo for screen readers</label>
+            <label className="label" htmlFor="alt">Describe the photo · shown under it and read aloud by screen readers</label>
             <input id="alt" className="input" value={img.alt} placeholder="e.g. Volunteers at the sponsor table" onChange={(e) => patch({ alt: e.target.value })} />
           </div>
           {def.id !== "hero" && (

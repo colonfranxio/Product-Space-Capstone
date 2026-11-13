@@ -8,6 +8,7 @@ import { mediaUrl } from "@/lib/report";
 import { uploadMedia } from "@/lib/upload";
 import { isHttpsUrl } from "@/lib/validate";
 import { ImagePick } from "../image-pick";
+import { DangerZone } from "../danger-zone";
 import { Swatches } from "../swatches";
 
 const HTTPS_MSG = "Paste a full link that starts with https://";
@@ -151,6 +152,7 @@ export function EventForm({ org, host, colors: initialColors, event }: {
         <span className="text-[13px] text-muted">{title.trim() ? "" : "Add a title to continue."}</span>
         {errors.form && <span className="err m-0" role="alert">{errors.form}</span>}
       </div>
+      {event && <div className="mt-14 max-w-[980px]"><DangerZone kind="event" id={event.id} after="/dashboard" /></div>}
     </form>
   );
 }

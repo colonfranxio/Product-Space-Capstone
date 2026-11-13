@@ -53,6 +53,12 @@ describe.skipIf(!ready)("database rules (live project)", () => {
     expect((await B.from("sponsors").update({ name: "pwned" }).eq("id", sponsorId).select()).data).toEqual([]);
   });
 
+  it("another admin can't delete the sponsor or event", async () => {
+    expect((await B.from("sponsors").delete().eq("id", sponsorId).select()).data).toEqual([]);
+    expect((await B.from("events").delete().eq("id", eventId).select()).data).toEqual([]);
+    expect((await A.from("sponsors").select("id").eq("id", sponsorId)).data).toHaveLength(1);
+  });
+
   it("public sees only the published snapshot; draft edits don't leak; slug locks", async () => {
     const pub = await A.from("sponsors").update({ published_snapshot: { v: 1, cta }, published_version: 1 }).eq("id", sponsorId).select("published_at").single();
     expect(pub.error).toBeNull();
@@ -77,5 +83,10 @@ describe.skipIf(!ready)("database rules (live project)", () => {
     const { data: org } = await A.from("organizations").select("id").single();
     const reserved = await A.from("events").insert({ organization_id: org!.id, title: "x", slug: "dashboard", brand_colors: DEFAULT_PALETTE, default_cta: cta });
     expect(reserved.error?.code).toBe("23514");
+  });
+
+  it("deleting an event deletes its sponsors (runs last)", async () => {
+    expect((await A.from("events").delete().eq("id", eventId).select("id")).data).toHaveLength(1);
+    expect((await A.from("sponsors").select("id").eq("id", sponsorId)).data).toEqual([]);
   });
 });

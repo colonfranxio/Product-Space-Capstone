@@ -264,6 +264,10 @@ export interface Actions {
   setSponsorSlug(sponsorId: string, slug: string): Promise<Result<{ slug: string; url: string }>>;
   /** Validates, then atomically replaces the public snapshot. fieldErrors lists what blocks publishing. */
   publishSponsor(sponsorId: string): Promise<Result<{ url: string; publishedVersion: number; publishedAt: string }>>;
+  /** Permanently deletes the event and (cascade) all its sponsors; their public pages stop working. */
+  deleteEvent(eventId: string): Promise<Result<null>>;
+  /** Permanently deletes the sponsor; its public page stops working. */
+  deleteSponsor(sponsorId: string): Promise<Result<null>>;
 }
 
 /** Uploads go straight from the browser to Storage (RLS-checked): bucket `media`, path `<orgId>/<eventId>/<uuid>.<ext>`. */

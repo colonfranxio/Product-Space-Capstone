@@ -74,7 +74,7 @@ export function validateMetrics(v: unknown, at: string, e: Errors = {}): Errors 
 export function validateCta(v: unknown, at: string, strict: boolean, e: Errors = {}): Errors {
   const c = v as Partial<Cta>;
   if (!isObj(c) || typeof c.enabled !== "boolean" || ![c.heading, c.body, c.buttonLabel, c.url].every(isStr)) e[at] = "Invalid CTA";
-  else if (strict && c.enabled && !isHttpsUrl(c.url)) e[`${at}.url`] = "Enter a full https:// link";
+  else if (strict && c.enabled && !isHttpsUrl(c.url)) e[`${at}.url`] = "Paste a full link that starts with https://";
   return e;
 }
 

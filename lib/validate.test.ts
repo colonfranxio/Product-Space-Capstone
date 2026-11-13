@@ -32,7 +32,7 @@ describe("validateSponsorContent", () => {
   it("lets drafts hold a half-typed CTA but blocks publishing it", () => {
     const c = { ...EMPTY_SPONSOR_CONTENT, ctaOverride: cta };
     expect(validateSponsorContent(c, false)).toEqual({});
-    expect(validateSponsorContent(c, true)).toEqual({ "cta.url": "Enter a full https:// link" });
+    expect(validateSponsorContent(c, true)).toEqual({ "cta.url": "Paste a full link that starts with https://" });
   });
   it("flags unknown slots and blocks", () => {
     const e = validateSponsorContent({ ...EMPTY_SPONSOR_CONTENT, images: { banner: {} }, text: { footer: styled } }, false);

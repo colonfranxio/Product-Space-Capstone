@@ -25,16 +25,23 @@ export async function proxy(request: NextRequest) {
   );
 
   const { data } = await supabase.auth.getClaims();
-  if (!data?.claims && request.nextUrl.pathname.startsWith("/dashboard")) {
+  const path = request.nextUrl.pathname;
+  if (!data?.claims && path.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("next", request.nextUrl.pathname);
+    url.searchParams.set("next", path);
     return NextResponse.redirect(url);
+  }
+  // Already signed in: skip the auth screens.
+  if (data?.claims && (path === "/login" || path === "/signup")) {
+    const redirect = NextResponse.redirect(new URL("/dashboard", request.url));
+    response.cookies.getAll().forEach((c) => redirect.cookies.set(c)); // keep a just-refreshed session
+    return redirect;
   }
   return response;
 }
 
 export const config = {
   // Only admin routes need the session; public sponsor pages stay cookie-free and cacheable.
-  matcher: ["/dashboard/:path*", "/login"],
+  matcher: ["/dashboard/:path*", "/login", "/signup"],
 };

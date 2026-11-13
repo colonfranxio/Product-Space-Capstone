@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from "vitest";
 import { DEFAULT_PALETTE, type ResolvedReport } from "../../../lib/contract";
-import PublicReportPage from "./page";
+import PublicReportPage, { generateMetadata } from "./page";
 
 const { readReport, renderer } = vi.hoisted(() => ({ readReport: vi.fn(), renderer: vi.fn() }));
 vi.mock("@/lib/data", () => ({ getPublishedReport: readReport }));
@@ -26,4 +26,11 @@ it("returns notFound for missing or unpublished reports", async () => {
   readReport.mockResolvedValue(null);
   await expect(PublicReportPage(props)).rejects.toThrow("not found");
   expect(renderer).not.toHaveBeenCalled();
+});
+
+it("titles shared links with the sponsor and event", async () => {
+  readReport.mockResolvedValue(report);
+  expect((await generateMetadata(props)).title).toBe("Thank you, Published sponsor · Published event");
+  readReport.mockResolvedValue(null);
+  expect(await generateMetadata(props)).toEqual({});
 });

@@ -186,3 +186,21 @@ export async function publishSponsor(sponsorId: string): R<"publishSponsor"> {
     },
   };
 }
+
+// ponytail: uploaded images stay in storage after a delete; add a storage sweep if orphaned files ever matter.
+async function deleteRow(table: "events" | "sponsors", id: string) {
+  const db = await authed();
+  if (!db) return fail("unauthorized");
+  // RLS limits deletes to the admin's own org; no row back means it isn't theirs or is already gone.
+  const { data, error } = await db.from(table).delete().eq("id", id).select("id").maybeSingle();
+  if (error) return fail(error.message);
+  return data ? { ok: true as const, data: null } : fail("not found");
+}
+
+export async function deleteEvent(eventId: string): R<"deleteEvent"> {
+  return deleteRow("events", eventId);
+}
+
+export async function deleteSponsor(sponsorId: string): R<"deleteSponsor"> {
+  return deleteRow("sponsors", sponsorId);
+}

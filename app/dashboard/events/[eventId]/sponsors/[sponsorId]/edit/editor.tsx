@@ -13,6 +13,7 @@ import { contrast, textOn } from "@/lib/color";
 import { mediaUrl, resolveReport } from "@/lib/report";
 import { uploadMedia } from "@/lib/upload";
 import { isHttpsUrl } from "@/lib/validate";
+import { DangerZone } from "@/app/dashboard/danger-zone";
 import { ImagePick } from "@/app/dashboard/image-pick";
 import { Swatches } from "@/app/dashboard/swatches";
 import { logoColors } from "./logo-colors";
@@ -164,6 +165,7 @@ export function Editor({ event, sponsor, host }: { event: EventRecord; sponsor: 
           setLogoError("error" in res ? res.error : "");
           if ("path" in res) update((d) => ({ ...d, logoPath: res.path }));
         }} />
+      <div className="mt-6"><DangerZone kind="sponsor" id={sponsor.id} after={`/dashboard/events/${event.id}`} /></div>
     </>,
     // 2 Template
     <>
